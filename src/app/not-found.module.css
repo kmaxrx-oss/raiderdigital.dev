@@ -1,0 +1,21 @@
+.page {
+  max-width: var(--rd-max);
+  margin: 0 auto;
+  padding: var(--rd-space-12) var(--rd-space-6);
+}
+
+.page h1 {
+  margin: 0 0 var(--rd-space-3);
+  letter-spacing: -0.03em;
+}
+
+.page p {
+  color: var(--rd-ink-muted);
+}
+
+.page a {
+  display: inline-block;
+  margin-top: var(--rd-space-4);
+  font-weight: 700;
+  color: var(--rd-accent);
+}

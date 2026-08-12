@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# raiderdigital.dev
 
-## Getting Started
+**Deployable Raider Digital web application** — homepage shell + Project Intake route foundation.
 
-First, run the development server:
+| Layer | Location |
+|-------|----------|
+| **This repo** | Application code, build, Hostinger Node root |
+| **Product law** | `seo-bot` → `managed-sites/raiderdigital.dev` (Forge, inventory, OPEN-TRANCHE) |
+
+Do **not** implement product wedges inside the seo-bot documentation workspace.
+
+## Stack
+
+**Next.js App Router + TypeScript + React + Vitest**
+
+Selected for co-located UI + Route Handlers (Mutation Gateway / submit), not because Star Glass uses Astro.  
+See [docs/STACK-SELECTION.md](./docs/STACK-SELECTION.md).
+
+## Local
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm ci
+npm run dev      # http://localhost:3000
+npm run build
+npm run start    # production server
+npm test
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Routes (shell)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Path | Role |
+|------|------|
+| `/` | Homepage shell |
+| `/project-intake` | Intake surface (T0+ product behavior under OPEN-TRANCHE) |
+| 404 | `not-found` |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Hostinger
 
-## Learn More
+Repository **root** is the app. See [docs/HOSTINGER.md](./docs/HOSTINGER.md).
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm ci && npm run build && npm run start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Product authority
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Forge / dual-lane / T0 packet live under:
 
-## Deploy on Vercel
+```text
+seo-bot/managed-sites/raiderdigital.dev/
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+T0 (`ProjectBrief`, Mutation Gateway, form projection) executes **here** after OPEN-TRANCHE names this repo’s paths.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Environment
+
+Copy `.env.example` → `.env.local` as needed. Never commit secrets.

@@ -1,0 +1,58 @@
+.page {
+  max-width: var(--rd-max);
+  margin: 0 auto;
+  padding: var(--rd-space-12) var(--rd-space-6);
+}
+
+.eyebrow {
+  margin: 0 0 var(--rd-space-3);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--rd-accent);
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.75rem, 3.5vw, 2.35rem);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.lead {
+  margin: var(--rd-space-4) 0 0;
+  max-width: 40rem;
+  color: var(--rd-ink-muted);
+}
+
+.panel {
+  margin-top: var(--rd-space-8);
+  padding: var(--rd-space-6);
+  border: 1px solid var(--rd-border);
+  border-radius: var(--rd-radius);
+  background: var(--rd-surface);
+  max-width: 40rem;
+}
+
+.panelTitle {
+  margin: 0 0 var(--rd-space-3);
+  font-size: 1.1rem;
+}
+
+.panel p {
+  margin: 0;
+  color: var(--rd-ink-muted);
+  font-size: 0.95rem;
+}
+
+.checklist {
+  margin: var(--rd-space-4) 0 0;
+  padding-left: 1.2rem;
+  color: var(--rd-ink-muted);
+  font-size: 0.9rem;
+}
+
+.checklist li {
+  margin-bottom: var(--rd-space-2);
+}

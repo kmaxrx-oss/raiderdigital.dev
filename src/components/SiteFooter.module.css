@@ -1,0 +1,17 @@
+.footer {
+  border-top: 1px solid var(--rd-border);
+  margin-top: var(--rd-space-12);
+  padding: var(--rd-space-8) var(--rd-space-6);
+  color: var(--rd-ink-muted);
+  font-size: 0.9rem;
+}
+
+.inner {
+  max-width: var(--rd-max);
+  margin: 0 auto;
+}
+
+.meta {
+  margin-top: var(--rd-space-2);
+  font-size: 0.8rem;
+}
