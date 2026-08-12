@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { IconSeo, IconWebDev, IconWorkflows } from "@/components/ServiceIcons";
 import styles from "./page.module.css";
@@ -101,16 +100,12 @@ export default function HomePage() {
             </a>
           </div>
         </div>
-        <div className={styles.heroMedia}>
-          <Image
-            src="/images/raider/assistant.png"
-            alt="Raider Bot character representing Raider Digital"
-            width={512}
-            height={768}
-            className={styles.heroBot}
-            priority
-          />
-        </div>
+        {/* Compositional character art — CSS background layer (not semantic content) */}
+        <div
+          className={styles.heroMediaSurface}
+          aria-hidden="true"
+          role="presentation"
+        />
       </section>
 
       {/* Direct answer */}
@@ -224,18 +219,12 @@ export default function HomePage() {
               Start a Project
             </Link>
           </div>
-          <div className={styles.howMedia}>
-            <Image
-              src="/images/raider/how-it-works.png"
-              alt="Illustration of Tell Raider, Project Brief, build, and get found steps"
-              width={1086}
-              height={362}
-              className={styles.howImg}
-            />
-            <p className={styles.caption}>
-              Illustration only — page headings and copy are the real content.
-            </p>
-          </div>
+          {/* Supplemental workflow illustration — HTML steps own meaning */}
+          <div
+            className={styles.howMediaSurface}
+            aria-hidden="true"
+            role="presentation"
+          />
         </div>
       </section>
 
