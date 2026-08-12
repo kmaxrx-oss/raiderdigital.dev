@@ -108,8 +108,10 @@ const results = {};
   const page = await ctx.newPage();
   page.setDefaultTimeout(60000);
   await openIntake(page);
-  await page.getByTestId("contact-first").click();
-  await page.waitForSelector('[data-phase="contact-first"]');
+  const cf = page.getByTestId("contact-first");
+  await cf.scrollIntoViewIfNeeded();
+  await cf.click();
+  await page.waitForSelector('[data-phase="contact-first"]', { timeout: 45000 });
   await saveField(
     page,
     "current_problem",
@@ -117,15 +119,17 @@ const results = {};
   );
   await saveField(page, "contact_name", "Pat Kim");
   await saveField(page, "contact_email", "pat@example.com");
+  await page.getByTestId("contact-first-continue").scrollIntoViewIfNeeded();
   await page.getByTestId("contact-first-continue").click();
-  await page.waitForSelector('[data-phase="review"]');
+  await page.waitForSelector('[data-phase="review"]', { timeout: 45000 });
   const overflow = await page.evaluate(
     () =>
       document.documentElement.scrollWidth >
       document.documentElement.clientWidth + 2,
   );
+  await page.getByTestId("submit-project-request").scrollIntoViewIfNeeded();
   await page.getByTestId("submit-project-request").click();
-  await page.waitForSelector('[data-phase="submitted"]');
+  await page.waitForSelector('[data-phase="submitted"]', { timeout: 45000 });
   const body = await page.locator("body").innerText();
   results.mobileContactFirst = body.includes("contact_first");
   results.overflowM = overflow;
