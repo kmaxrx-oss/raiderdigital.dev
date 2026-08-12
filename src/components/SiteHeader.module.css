@@ -1,16 +1,16 @@
 .header {
-  border-bottom: 1px solid var(--rd-border);
-  background: color-mix(in srgb, var(--rd-surface) 92%, transparent);
-  backdrop-filter: blur(8px);
+  background: var(--rd-nav);
+  color: var(--rd-panel-ink);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 40;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .inner {
   max-width: var(--rd-max);
   margin: 0 auto;
-  padding: var(--rd-space-4) var(--rd-space-6);
+  padding: 0.85rem var(--rd-space-6);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -18,24 +18,65 @@
 }
 
 .brand {
-  font-weight: 800;
-  letter-spacing: -0.03em;
+  display: inline-flex;
+  align-items: center;
   text-decoration: none;
-  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+
+.logo {
+  width: auto;
+  height: 2.35rem;
+  object-fit: contain;
 }
 
 .nav {
   display: flex;
-  gap: var(--rd-space-4);
-  font-size: 0.95rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem 1.1rem;
+  font-size: 0.92rem;
   font-weight: 600;
 }
 
 .nav a {
   text-decoration: none;
-  color: var(--rd-ink-muted);
+  color: rgba(244, 247, 251, 0.82);
+  transition: color 0.15s ease;
 }
 
 .nav a:hover {
-  color: var(--rd-ink);
+  color: #fff;
+}
+
+.cta {
+  display: inline-flex !important;
+  align-items: center;
+  min-height: 2.4rem;
+  padding: 0.45rem 1rem;
+  border-radius: var(--rd-radius-pill);
+  background: var(--rd-accent) !important;
+  color: #041018 !important;
+  font-weight: 800 !important;
+}
+
+.cta:hover {
+  filter: brightness(1.05);
+}
+
+@media (max-width: 720px) {
+  .inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--rd-space-3);
+  }
+
+  .nav {
+    justify-content: flex-start;
+  }
+
+  .logo {
+    height: 2rem;
+  }
 }

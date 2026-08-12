@@ -15,12 +15,25 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://raiderdigital.dev"),
   title: {
-    default: "Raider Digital",
+    default: "Raider Digital | Websites, Local SEO, and Workflows for Service Businesses",
     template: "%s · Raider Digital",
   },
   description:
-    "Raider Digital designs and builds websites, customer workflows, and operating systems for service businesses.",
+    "Build a website and the digital systems around it — customer intake, discovery, and staff workflows. Start a project with Raider Digital.",
+  icons: {
+    icon: [{ url: "/favicon.png", type: "image/png" }],
+    apple: [{ url: "/images/raider/favicon-mark.png" }],
+  },
+  openGraph: {
+    title: "Raider Digital | Websites, Local SEO, and Workflows",
+    description:
+      "Websites and systems that help service businesses get customers and run work.",
+    url: "https://raiderdigital.dev/",
+    siteName: "Raider Digital",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
