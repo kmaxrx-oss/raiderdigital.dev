@@ -58,6 +58,22 @@ Source: Operator Downloads (2026-08-12). Copied into this folder without recompr
 
 Do not ship the mockups' sample metrics, case-study results, phone numbers, client identities, testimonials, or other example claims as Raider facts unless separately established as real Raider content.
 
+## Logo system
+
+Primary logo language uses the cyan LED Raider Bot face on black with cyan LED “RAIDER DIGITAL” typography.
+
+| Asset | Path | Geometry (source) | Intended use |
+|-------|------|-------------------|--------------|
+| Square mark | `logo/raider-logo-1.png` | 1254×1254 | Stacked face + RAIDER DIGITAL; favicon / app icon / social avatar / mobile compact branding |
+| Horizontal mark | `logo/raider-logo-2.png` | 1536×1024 | Face left + RAIDER DIGITAL right; desktop header / footer |
+
+- **Square mark** = stacked face + RAIDER DIGITAL.  
+- **Horizontal mark** = face left + RAIDER DIGITAL right.  
+- The LED face alone can become a very small icon variant later if needed.  
+- These are **current production reference assets** and may be refined later without reopening the broader Raider visual system.
+
+Source: Operator Downloads (2026-08-12). Byte-preserved into `logo/`.
+
 ## Skill
 
 Later mockup-governed UI builds: `seo-bot/.grok/skills/mockup-guided-ui-build/SKILL.md`  
