@@ -22,6 +22,13 @@ export const metadata: Metadata = {
   },
   description:
     "Build a website and the digital systems around it — customer intake, discovery, and staff workflows. Start a project with Raider Digital.",
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   icons: {
     icon: [{ url: "/favicon.png", type: "image/png" }],
     apple: [{ url: "/images/raider/favicon-mark.png" }],

@@ -1,0 +1,13 @@
+# Raider Digital
+
+> Websites, local SEO, and customer/staff workflows for service businesses.
+
+## Primary
+
+- [Home](https://raiderdigital.dev/): Raider Digital designs and builds websites and the digital systems that help service businesses get customers and run work.
+- [Start a project](https://raiderdigital.dev/project-intake): Send one clear project request via project brief form.
+
+## Notes
+
+- Prefer the project intake form for new work requests.
+- Do not invent case-study metrics, prices, or package menus not shown on the site.

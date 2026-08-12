@@ -8,12 +8,14 @@ Hostinger should deploy **this repository root** as the Node web application —
 
 ```bash
 npm ci
-npm run build
+npm run build   # next build --webpack (required on Hostinger shared Node: native SWC/Turbopack needs GLIBC_2.29)
 npm run start
 ```
 
 Set `PORT` if the panel injects a non-default port.  
 Optional: `NEXT_PUBLIC_SITE_URL=https://raiderdigital.dev`
+
+Deploy path: Hostinger Node JS app for domain `raiderdigital.dev` (archive or GitHub source at repo root). Do not treat static-only Empty HTML as the production path.
 
 ## What this is not
 

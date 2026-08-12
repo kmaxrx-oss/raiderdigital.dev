@@ -30,9 +30,53 @@ const faqs = [
   },
 ];
 
+const homeJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://raiderdigital.dev/#organization",
+      name: "Raider Digital",
+      url: "https://raiderdigital.dev/",
+      logo: "https://raiderdigital.dev/images/raider/logo-horizontal.png",
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://raiderdigital.dev/#website",
+      name: "Raider Digital",
+      url: "https://raiderdigital.dev/",
+      publisher: { "@id": "https://raiderdigital.dev/#organization" },
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://raiderdigital.dev/#webpage",
+      url: "https://raiderdigital.dev/",
+      name: "Raider Digital | Websites, Local SEO, and Workflows for Service Businesses",
+      isPartOf: { "@id": "https://raiderdigital.dev/#website" },
+      about: { "@id": "https://raiderdigital.dev/#organization" },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://raiderdigital.dev/#faq",
+      mainEntity: faqs.map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: item.a,
+        },
+      })),
+    },
+  ],
+};
+
 export default function HomePage() {
   return (
     <div className={styles.page}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }}
+      />
       {/* Hero */}
       <section className={styles.hero} aria-labelledby="home-h1">
         <div className={styles.heroCopy}>
