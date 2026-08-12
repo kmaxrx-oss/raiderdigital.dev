@@ -2,6 +2,13 @@ import type { Metadata } from "next";
 import { ProjectBriefForm } from "@/components/intake/ProjectBriefForm";
 import styles from "./page.module.css";
 
+/**
+ * Hostinger/hCDN may cache prerendered HTML with multi-month s-maxage.
+ * Intake is a live product surface (review/submit) — never serve stale shell.
+ */
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Project intake",
   description:
