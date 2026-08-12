@@ -70,3 +70,32 @@ export type ApplyErr = {
 };
 
 export type ApplyResult = ApplyOk | ApplyErr;
+
+/** Submit path flags (forge ProjectRequest.path). T1 uses `full` only. */
+export type SubmitPath = "full" | "graceful_finish" | "contact_first";
+
+export interface ConsolidatedField {
+  field_id: string;
+  label: string;
+  value: FieldValue;
+  status: FieldStatus;
+}
+
+/** Pure consolidate projection (P14) — organizes facts; invents nothing. */
+export interface ConsolidatedView {
+  known: ConsolidatedField[];
+  unknown_field_ids: string[];
+  empty_core_field_ids: string[];
+}
+
+export interface ProjectRequest {
+  request_id: string;
+  brief_id: string;
+  session_id: string;
+  path: SubmitPath;
+  idempotency_key: string;
+  brief_version: number;
+  fields: Record<string, FieldRecord>;
+  consolidated: ConsolidatedView;
+  created_at: string;
+}

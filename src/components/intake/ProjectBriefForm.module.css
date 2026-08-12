@@ -160,14 +160,28 @@
   word-break: break-word;
 }
 
-.debug {
-  margin-top: var(--rd-space-4);
-  max-height: 16rem;
-  overflow: auto;
-  padding: var(--rd-space-3);
-  border-radius: 0.75rem;
-  background: var(--rd-panel);
-  color: var(--rd-panel-ink);
-  font-size: 0.7rem;
-  line-height: 1.4;
+.h3 {
+  margin: var(--rd-space-5) 0 var(--rd-space-2);
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+}
+
+.success {
+  border: 1px solid var(--rd-border);
+  border-radius: var(--rd-radius);
+  background: var(--rd-surface);
+  padding: var(--rd-space-6);
+  max-width: 36rem;
+}
+
+.metaLine {
+  margin: 0 0 var(--rd-space-4);
+  font-size: 0.9rem;
+  color: var(--rd-ink-muted);
+}
+
+.primaryBtn:disabled,
+.secondaryBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
