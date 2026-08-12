@@ -74,6 +74,14 @@ Primary logo language uses the cyan LED Raider Bot face on black with cyan LED â
 
 Source: Operator Downloads (2026-08-12). Byte-preserved into `logo/`.
 
+## Production graphic candidates
+
+Additional Operator-approved **candidates** (not all ship on homepage):
+
+`production-candidates/` + ledger `production-candidates/ASSET-LEDGER.md`
+
+Ingredients inside this visual system only. Selection happens during mockup-guided homepage build against the PAGE BUILD contract. Unused options remain for child pages or later iteration.
+
 ## Skill
 
 Later mockup-governed UI builds: `seo-bot/.grok/skills/mockup-guided-ui-build/SKILL.md`  
