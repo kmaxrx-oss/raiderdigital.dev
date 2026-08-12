@@ -91,11 +91,15 @@ export function submitProjectRequest(input: {
   }
 
   const path: SubmitPath = input.path ?? "full";
-  if (path !== "full") {
+  if (
+    path !== "full" &&
+    path !== "graceful_finish" &&
+    path !== "contact_first"
+  ) {
     return {
       ok: false,
       error: "INVALID_PATH",
-      message: "Only path=full is supported in this release.",
+      message: "Unsupported submit path.",
       briefPreserved: true,
     };
   }
@@ -117,6 +121,7 @@ export function submitProjectRequest(input: {
 
   const elig = evaluateSubmitEligibility(input.brief, {
     onReview: input.onReview,
+    path,
   });
   if (!elig.ok) {
     return {

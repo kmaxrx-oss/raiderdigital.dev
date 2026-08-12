@@ -4,6 +4,8 @@ import { useCallback, useMemo, useState } from "react";
 import {
   applyFormSet,
   applyFormUnknown,
+  canShowContactFirst,
+  canShowFinish,
   consolidateBrief,
   createEmptyBrief,
   evaluateSubmitEligibility,
@@ -11,15 +13,30 @@ import {
   FIELD_LABELS,
   getOrCreateBrowserSessionId,
   isNucleusSatisfied,
+  phaseAfterFinishClick,
+  phaseAfterFinishMinContact,
+  phaseAfterContactFirstReady,
+  phaseEnterContactFirst,
+  phaseEnterFullReview,
+  phaseKeepTalking,
+  PHASE_GUEST_LABEL,
   type CoreFieldId,
+  type InteractionPhase,
   type ProjectBrief,
   type ProjectRequest,
+  type SubmitPath,
 } from "@/lib/intake";
 import styles from "./ProjectBriefForm.module.css";
 
-type Phase = "edit" | "review" | "submitted";
-
 const IDEM_STORAGE = "rd_intake_submit_idempotency_key";
+
+const CONTACT_FIELD_IDS: CoreFieldId[] = ["contact_name", "contact_email"];
+const CONTACT_FIRST_FIELD_IDS: CoreFieldId[] = [
+  "current_problem",
+  "primary_objective",
+  "contact_name",
+  "contact_email",
+];
 
 function fieldDisplay(brief: ProjectBrief, id: CoreFieldId): string {
   const rec = brief.fields[id];
@@ -74,17 +91,27 @@ export function ProjectBriefForm() {
   );
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [lastError, setLastError] = useState<string | null>(null);
-  const [phase, setPhase] = useState<Phase>("edit");
+  const [interactionPhase, setInteractionPhase] =
+    useState<InteractionPhase>("INTAKE_ACTIVE");
+  const [submitPath, setSubmitPath] = useState<SubmitPath>("full");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState<ProjectRequest | null>(null);
   const [idempotencyKey, setIdempotencyKey] = useState("");
 
   const nucleus = useMemo(() => isNucleusSatisfied(brief), [brief]);
   const consolidated = useMemo(() => consolidateBrief(brief), [brief]);
+  const onReview = interactionPhase === "READY_FOR_REVIEW";
   const eligibility = useMemo(
-    () => evaluateSubmitEligibility(brief, { onReview: phase === "review" }),
-    [brief, phase],
+    () =>
+      evaluateSubmitEligibility(brief, {
+        onReview,
+        path: submitPath,
+      }),
+    [brief, onReview, submitPath],
   );
+
+  const showFinish = canShowFinish(brief);
+  const showContactFirst = canShowContactFirst(brief);
 
   const onChangeDraft = useCallback((id: CoreFieldId, value: string) => {
     setDrafts((d) => ({ ...d, [id]: value }));
@@ -133,27 +160,78 @@ export function ProjectBriefForm() {
     [brief],
   );
 
-  const enterReview = useCallback(() => {
-    const elig = evaluateSubmitEligibility(brief, { onReview: true });
+  const ensureIdemKey = useCallback(() => {
+    if (idempotencyKey) return idempotencyKey;
+    const key = getOrCreateIdempotencyKey();
+    setIdempotencyKey(key);
+    return key;
+  }, [idempotencyKey]);
+
+  const enterFullReview = useCallback(() => {
+    const next = phaseEnterFullReview();
+    const elig = evaluateSubmitEligibility(brief, {
+      onReview: true,
+      path: next.submitPath,
+    });
     if (!elig.ok) {
       setLastError(elig.reasons.join(" "));
       return;
     }
-    setPhase("review");
+    setSubmitPath(next.submitPath);
+    setInteractionPhase(next.phase);
+    ensureIdemKey();
     setLastError(null);
-    if (!idempotencyKey) {
-      setIdempotencyKey(getOrCreateIdempotencyKey());
-    }
-  }, [brief, idempotencyKey]);
+  }, [brief, ensureIdemKey]);
 
-  const backToEdit = useCallback(() => {
-    setPhase("edit");
+  const onFinish = useCallback(() => {
+    if (!canShowFinish(brief)) {
+      setLastError("Add a bit more about the problem or goal first.");
+      return;
+    }
+    const next = phaseAfterFinishClick(brief);
+    setSubmitPath(next.submitPath);
+    setInteractionPhase(next.phase);
+    ensureIdemKey();
+    setLastError(null);
+  }, [brief, ensureIdemKey]);
+
+  const onContactFirst = useCallback(() => {
+    const next = phaseEnterContactFirst();
+    setSubmitPath(next.submitPath);
+    setInteractionPhase(next.phase);
+    setLastError(null);
+  }, []);
+
+  const continueFromContactFirst = useCallback(() => {
+    const next = phaseAfterContactFirstReady(brief);
+    if (!next.ok || !next.phase) {
+      setLastError(next.reasons.join(" "));
+      return;
+    }
+    setInteractionPhase(next.phase);
+    ensureIdemKey();
+    setLastError(null);
+  }, [brief, ensureIdemKey]);
+
+  const continueFromFinishMinContact = useCallback(() => {
+    const next = phaseAfterFinishMinContact(brief);
+    if (!next.ok || !next.phase) {
+      setLastError(next.reasons.join(" "));
+      return;
+    }
+    setInteractionPhase(next.phase);
+    ensureIdemKey();
+    setLastError(null);
+  }, [brief, ensureIdemKey]);
+
+  /** P7 Keep talking — never clears contact_* (brief state untouched). */
+  const keepTalking = useCallback(() => {
+    setInteractionPhase(phaseKeepTalking());
     setLastError(null);
   }, []);
 
   const sendRequest = useCallback(async () => {
-    const key = idempotencyKey || getOrCreateIdempotencyKey();
-    if (!idempotencyKey) setIdempotencyKey(key);
+    const key = ensureIdemKey();
     setSubmitting(true);
     setLastError(null);
     try {
@@ -165,7 +243,7 @@ export function ProjectBriefForm() {
         },
         body: JSON.stringify({
           brief,
-          path: "full",
+          path: submitPath,
           onReview: true,
         }),
       });
@@ -174,7 +252,6 @@ export function ProjectBriefForm() {
         request?: ProjectRequest;
         message?: string;
         reasons?: string[];
-        error?: string;
       };
       if (!data.ok || !data.request) {
         setLastError(
@@ -184,7 +261,7 @@ export function ProjectBriefForm() {
         return;
       }
       setSubmitted(data.request);
-      setPhase("submitted");
+      setInteractionPhase("SUBMITTED");
       clearIdempotencyKey();
     } catch {
       setLastError(
@@ -193,13 +270,14 @@ export function ProjectBriefForm() {
     } finally {
       setSubmitting(false);
     }
-  }, [brief, idempotencyKey]);
+  }, [brief, ensureIdemKey, submitPath]);
 
   const startNewRequest = useCallback(() => {
     clearIdempotencyKey();
     setIdempotencyKey("");
     setSubmitted(null);
-    setPhase("edit");
+    setInteractionPhase("INTAKE_ACTIVE");
+    setSubmitPath("full");
     setBrief(
       createEmptyBrief(
         typeof window !== "undefined"
@@ -211,7 +289,55 @@ export function ProjectBriefForm() {
     setLastError(null);
   }, []);
 
-  if (phase === "submitted" && submitted) {
+  const renderFields = (ids: CoreFieldId[]) =>
+    ids.map((id) => {
+      const committed = brief.fields[id];
+      const value =
+        drafts[id] !== undefined ? drafts[id] : fieldDisplay(brief, id);
+      const isUnknown = committed?.status === "unknown";
+      return (
+        <div key={id} className={styles.field}>
+          <label htmlFor={`field-${id}`} className={styles.label}>
+            {FIELD_LABELS[id]}
+            {id === "contact_email" || id === "contact_name"
+              ? " (required to send)"
+              : ""}
+          </label>
+          <p className={styles.status}>{statusLabel(brief, id)}</p>
+          <textarea
+            id={`field-${id}`}
+            className={styles.input}
+            rows={
+              id === "current_problem" || id === "customer_actions" ? 3 : 2
+            }
+            value={isUnknown && drafts[id] === undefined ? "" : value}
+            placeholder={
+              isUnknown ? "Marked unknown — type to set a value" : undefined
+            }
+            onChange={(e) => onChangeDraft(id, e.target.value)}
+            data-testid={`field-${id}`}
+          />
+          <div className={styles.actions}>
+            <button
+              type="button"
+              className={styles.primaryBtn}
+              onClick={() => commitField(id)}
+            >
+              Save
+            </button>
+            <button
+              type="button"
+              className={styles.secondaryBtn}
+              onClick={() => markUnknown(id)}
+            >
+              Mark unknown
+            </button>
+          </div>
+        </div>
+      );
+    });
+
+  if (interactionPhase === "SUBMITTED" && submitted) {
     return (
       <div className={styles.wrap} data-phase="submitted">
         <div className={styles.success} role="status">
@@ -222,6 +348,8 @@ export function ProjectBriefForm() {
           </p>
           <p className={styles.metaLine}>
             Reference: <strong>{submitted.request_id.slice(0, 8)}</strong>
+            {" · "}
+            Path: <strong>{submitted.path}</strong>
           </p>
           <button
             type="button"
@@ -235,31 +363,30 @@ export function ProjectBriefForm() {
     );
   }
 
-  if (phase === "review") {
+  if (interactionPhase === "READY_FOR_REVIEW") {
     return (
       <div className={styles.wrap} data-phase="review">
         <div className={styles.meta} aria-live="polite">
           <span>
-            Ready to send:{" "}
+            {PHASE_GUEST_LABEL.READY_FOR_REVIEW}
+            {" · "}
+            Ready:{" "}
             <strong className={eligibility.ok ? styles.ok : styles.warn}>
               {eligibility.ok ? "yes" : "not yet"}
             </strong>
           </span>
         </div>
-
         {lastError ? (
           <p className={styles.error} role="alert">
             {lastError}
           </p>
         ) : null}
-
         <section className={styles.form} aria-label="Review project request">
           <h2 className={styles.h2}>Review your Project Brief</h2>
           <p className={styles.help}>
             Confirm what you are sending. Nothing is invented — only what you
-            saved on the form.
+            saved.
           </p>
-
           <h3 className={styles.h3}>What you told Raider</h3>
           {consolidated.known.length === 0 ? (
             <p className={styles.help}>No saved facts yet.</p>
@@ -277,7 +404,6 @@ export function ProjectBriefForm() {
               ))}
             </ul>
           )}
-
           {consolidated.unknown_field_ids.length > 0 ? (
             <>
               <h3 className={styles.h3}>Marked unknown</h3>
@@ -293,15 +419,15 @@ export function ProjectBriefForm() {
               </ul>
             </>
           ) : null}
-
           <div className={styles.actions} style={{ marginTop: "1.25rem" }}>
             <button
               type="button"
               className={styles.secondaryBtn}
-              onClick={backToEdit}
+              onClick={keepTalking}
               disabled={submitting}
+              data-testid="keep-talking"
             >
-              Back to edit
+              Keep talking
             </button>
             <button
               type="button"
@@ -318,13 +444,96 @@ export function ProjectBriefForm() {
     );
   }
 
+  if (interactionPhase === "FINISH_MIN_CONTACT") {
+    return (
+      <div className={styles.wrap} data-phase="finish-min-contact">
+        <div className={styles.meta}>
+          <span>{PHASE_GUEST_LABEL.FINISH_MIN_CONTACT}</span>
+        </div>
+        {lastError ? (
+          <p className={styles.error} role="alert">
+            {lastError}
+          </p>
+        ) : null}
+        <section className={styles.form}>
+          <h2 className={styles.h2}>Almost done</h2>
+          <p className={styles.help}>
+            Add your name and email so Raider can follow up. Your brief is kept
+            as-is.
+          </p>
+          {renderFields(CONTACT_FIELD_IDS)}
+          <div className={styles.actions}>
+            <button
+              type="button"
+              className={styles.secondaryBtn}
+              onClick={keepTalking}
+            >
+              Keep talking
+            </button>
+            <button
+              type="button"
+              className={styles.primaryBtn}
+              onClick={continueFromFinishMinContact}
+              data-testid="finish-min-contact-continue"
+            >
+              Continue to review
+            </button>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  if (interactionPhase === "CONTACT_FIRST") {
+    return (
+      <div className={styles.wrap} data-phase="contact-first">
+        <div className={styles.meta}>
+          <span>{PHASE_GUEST_LABEL.CONTACT_FIRST}</span>
+        </div>
+        {lastError ? (
+          <p className={styles.error} role="alert">
+            {lastError}
+          </p>
+        ) : null}
+        <section className={styles.form}>
+          <h2 className={styles.h2}>Short project request</h2>
+          <p className={styles.help}>
+            Leave a short description and your contact. You can add more detail
+            later — this is still one Project Brief, not a separate form.
+          </p>
+          {renderFields(CONTACT_FIRST_FIELD_IDS)}
+          <div className={styles.actions}>
+            <button
+              type="button"
+              className={styles.secondaryBtn}
+              onClick={keepTalking}
+            >
+              Back to full brief
+            </button>
+            <button
+              type="button"
+              className={styles.primaryBtn}
+              onClick={continueFromContactFirst}
+              data-testid="contact-first-continue"
+            >
+              Continue to review
+            </button>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  // INTAKE_ACTIVE
   return (
     <div className={styles.wrap} data-phase="edit">
       <div className={styles.meta} aria-live="polite">
         <span>
           Progress:{" "}
           <strong className={nucleus ? styles.ok : styles.warn}>
-            {nucleus ? "enough to describe the work" : "add the core problem or goal"}
+            {nucleus
+              ? "enough to describe the work"
+              : "add the core problem or goal"}
           </strong>
         </span>
       </div>
@@ -339,66 +548,47 @@ export function ProjectBriefForm() {
         <section className={styles.form} aria-label="Project Brief form">
           <h2 className={styles.h2}>Fill in your Project Brief</h2>
           <p className={styles.help}>
-            Save each field as you go. When name and email are saved and you
-            have described the work, review and send one clear request.
+            Save each field as you go. When you are ready, review and send one
+            clear request.
           </p>
-          {FORM_FIELD_IDS.map((id) => {
-            const committed = brief.fields[id];
-            const value =
-              drafts[id] !== undefined ? drafts[id] : fieldDisplay(brief, id);
-            const isUnknown = committed?.status === "unknown";
-            return (
-              <div key={id} className={styles.field}>
-                <label htmlFor={`field-${id}`} className={styles.label}>
-                  {FIELD_LABELS[id]}
-                  {id === "contact_email" || id === "contact_name"
-                    ? " (required to send)"
-                    : ""}
-                </label>
-                <p className={styles.status}>{statusLabel(brief, id)}</p>
-                <textarea
-                  id={`field-${id}`}
-                  className={styles.input}
-                  rows={
-                    id === "current_problem" || id === "customer_actions" ? 3 : 2
-                  }
-                  value={isUnknown && drafts[id] === undefined ? "" : value}
-                  placeholder={
-                    isUnknown ? "Marked unknown — type to set a value" : undefined
-                  }
-                  onChange={(e) => onChangeDraft(id, e.target.value)}
-                  data-testid={`field-${id}`}
-                />
-                <div className={styles.actions}>
-                  <button
-                    type="button"
-                    className={styles.primaryBtn}
-                    onClick={() => commitField(id)}
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.secondaryBtn}
-                    onClick={() => markUnknown(id)}
-                  >
-                    Mark unknown
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+          {renderFields(FORM_FIELD_IDS)}
 
-          <div className={styles.actions}>
+          <div className={styles.actions} data-testid="intake-actions">
             <button
               type="button"
               className={styles.primaryBtn}
-              onClick={enterReview}
+              onClick={enterFullReview}
               data-testid="enter-review"
             >
               Review and send
             </button>
+            {showFinish ? (
+              <button
+                type="button"
+                className={styles.secondaryBtn}
+                onClick={onFinish}
+                data-testid="finish-with-what-i-have"
+              >
+                Finish with what I have
+              </button>
+            ) : null}
+            {showContactFirst ? (
+              <button
+                type="button"
+                className={styles.secondaryBtn}
+                onClick={onContactFirst}
+                data-testid="contact-first"
+              >
+                Short request with contact
+              </button>
+            ) : null}
           </div>
+          {!showFinish && showContactFirst ? (
+            <p className={styles.help} style={{ marginTop: "0.75rem" }}>
+              Prefer a shorter path? Use a short request with your contact, or
+              keep filling the brief until Finish appears.
+            </p>
+          ) : null}
         </section>
 
         <aside className={styles.panel} aria-label="Brief summary">
@@ -417,9 +607,7 @@ export function ProjectBriefForm() {
                       ? "—"
                       : rec.status === "unknown"
                         ? "Unknown"
-                        : rec.status === "stated"
-                          ? `${Array.isArray(rec.value) ? rec.value.join(", ") : rec.value}`
-                          : `${Array.isArray(rec.value) ? rec.value.join(", ") : rec.value}`}
+                        : `${Array.isArray(rec.value) ? rec.value.join(", ") : rec.value}`}
                   </span>
                 </li>
               );

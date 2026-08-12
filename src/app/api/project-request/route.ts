@@ -9,9 +9,9 @@ import {
 export const runtime = "nodejs";
 
 /**
- * T1 form-only submit.
+ * Project request submit (T1+T2 paths).
  * Requires header Idempotency-Key (P2).
- * Body: { brief, path?: "full", onReview: true }
+ * Body: { brief, path?: "full"|"graceful_finish"|"contact_first", onReview: true }
  */
 export async function POST(req: Request) {
   const key =

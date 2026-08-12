@@ -7,3 +7,4 @@ export * from "./gateway";
 export * from "./consolidate";
 export * from "./eligibility";
 export * from "./submit";
+export * from "./phases";
